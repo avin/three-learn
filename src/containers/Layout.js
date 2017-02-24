@@ -17,6 +17,7 @@ class Layout extends React.Component {
                     <Link to="/simple-scene">SimpleScene</Link>
                     {' | '}
                     <Link to="/about">About</Link>
+
                 </div>
                 <hr/>
                 {this.props.children}

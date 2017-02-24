@@ -1,10 +1,11 @@
 import { AppContainer } from 'react-hot-loader';
 import React from 'react';
-import {render} from 'react-dom';
+import { render } from 'react-dom';
 import Root from './containers/Root';
 import createStore from './redux/createStore';
 import { browserHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
+import './styles/index.less';
 
 const store = createStore();
 const history = syncHistoryWithStore(browserHistory, store);

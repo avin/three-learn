@@ -1,14 +1,32 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import * as THREE from 'three';
-import Counter from '../counter'
+import Control from './Control';
+import TWEEN from 'tween.js';
+
+const THREE = require('three');
+THREE.CopyShader = require('imports-loader?THREE=three!exports-loader?THREE.CopyShader!three/examples/js/shaders/CopyShader');
+THREE.EffectComposer = require('imports-loader?THREE=three!exports-loader?THREE.EffectComposer!three/examples/js/postprocessing/EffectComposer');
+THREE.RenderPass = require('imports-loader?THREE=three!exports-loader?THREE.RenderPass!three/examples/js/postprocessing/RenderPass');
+THREE.ShaderPass = require('imports-loader?THREE=three!exports-loader?THREE.ShaderPass!three/examples/js/postprocessing/ShaderPass');
+THREE.HorizontalBlurShader = require('imports-loader?THREE=three!exports-loader?THREE.HorizontalBlurShader!three/examples/js/shaders/HorizontalBlurShader');
+THREE.VerticalBlurShader = require('imports-loader?THREE=three!exports-loader?THREE.VerticalBlurShader!three/examples/js/shaders/VerticalBlurShader');
+
 
 export class SimpleScene extends React.Component {
 
-    //newCubePosition = 0;
-
-    shouldComponentUpdate(nextProps, nextState){
-        //this.newCubePosition = nextProps.value;
+    shouldComponentUpdate(nextProps, nextState) {
+        const {position, rotation} = nextProps;
+        if (this.props.position !== position) {
+            new TWEEN.Tween(this.cube.position).to(position.toJS(), 200)
+                .easing(TWEEN.Easing.Elastic.Out)
+                .start();
+        }
+        if (this.props.rotation !== rotation) {
+            console.log(rotation.toJS());
+            new TWEEN.Tween(this.cube.rotation).to(rotation.toJS(), 1000)
+                .easing(TWEEN.Easing.Elastic.Out)
+                .start();
+        }
 
         return false;
     }
@@ -26,9 +44,19 @@ export class SimpleScene extends React.Component {
         });
         renderer.setSize(width, height);
 
+        const composer = new THREE.EffectComposer(renderer);
+        composer.addPass(new THREE.RenderPass(scene, camera));
+
+        const hblur = this.hblur = new THREE.ShaderPass(THREE.HorizontalBlurShader);
+        composer.addPass(hblur);
+
+        const vblur = this.vblur = new THREE.ShaderPass(THREE.VerticalBlurShader);
+        vblur.renderToScreen = true;
+        composer.addPass(vblur);
+
 
         const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+        const material = new THREE.MeshNormalMaterial();
         const cube = this.cube = new THREE.Mesh(geometry, material);
         scene.add(cube);
 
@@ -37,29 +65,23 @@ export class SimpleScene extends React.Component {
         const render = () => {
             requestAnimationFrame(render);
 
-            cube.rotation.x += 0.1;
-            cube.rotation.y += 0.1;
+            hblur.uniforms.h.value = cube.position.z * 0.001;
+            vblur.uniforms.v.value = cube.position.z * 0.001;
 
-            if (cube.position.y <= this.props.value){
-                cube.position.y = cube.position.y + 0.1
-            }
+            TWEEN.update();
 
-            if (cube.position.y >= this.props.value){
-                cube.position.y = cube.position.y - 0.1
-            }
-
-            renderer.render(scene, camera);
+            //renderer.render(scene, camera);
+            composer.render();
         };
 
         render();
     }
 
-    component
-
     render() {
         return (
             <div>
-                <Counter />
+                <Control />
+                <hr/>
                 <canvas ref="canvas" width={800} height={600}/>
             </div>
         )
@@ -67,9 +89,9 @@ export class SimpleScene extends React.Component {
 }
 
 function mapStateToProps(state, ownProps) {
-    const value = state.counter.get('value');
     return {
-        value
+        position: state.simpleScene.get('position'),
+        rotation: state.simpleScene.get('rotation'),
     }
 }
 
