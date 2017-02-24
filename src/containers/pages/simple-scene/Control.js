@@ -25,7 +25,7 @@ export class Control extends React.Component {
     render() {
         const {position, rotation} = this.props;
         return (
-            <div>
+            <div style={{margin: 20}}>
                 <div className="row">
                     <div className="col-xs-6">
                         <div className="pt-card pt-elevation-1 no-padding" style={{marginBottom: 15}}>

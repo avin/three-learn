@@ -22,7 +22,6 @@ export class SimpleScene extends React.Component {
                 .start();
         }
         if (this.props.rotation !== rotation) {
-            console.log(rotation.toJS());
             new TWEEN.Tween(this.cube.rotation).to(rotation.toJS(), 1000)
                 .easing(TWEEN.Easing.Elastic.Out)
                 .start();
@@ -33,6 +32,11 @@ export class SimpleScene extends React.Component {
 
     componentDidMount() {
         const canvasEl = this.refs.canvas;
+        const rect = canvasEl.getBoundingClientRect();
+
+        canvasEl.width = window.innerWidth - rect.left * 2;
+        canvasEl.height = window.innerHeight - rect.top - 4;
+
         const width = canvasEl.width;
         const height = canvasEl.height;
 
@@ -44,6 +48,8 @@ export class SimpleScene extends React.Component {
         });
         renderer.setSize(width, height);
 
+        //Setup visual effect
+
         const composer = new THREE.EffectComposer(renderer);
         composer.addPass(new THREE.RenderPass(scene, camera));
 
@@ -54,6 +60,7 @@ export class SimpleScene extends React.Component {
         vblur.renderToScreen = true;
         composer.addPass(vblur);
 
+        //Add main mesh
 
         const geometry = new THREE.BoxGeometry(1, 1, 1);
         const material = new THREE.MeshNormalMaterial();
@@ -65,8 +72,9 @@ export class SimpleScene extends React.Component {
         const render = () => {
             requestAnimationFrame(render);
 
-            hblur.uniforms.h.value = cube.position.z * 0.001;
-            vblur.uniforms.v.value = cube.position.z * 0.001;
+            //Change blur on Z position changes
+            hblur.uniforms.h.value = cube.position.z * 0.0005;
+            vblur.uniforms.v.value = cube.position.z * 0.0005;
 
             TWEEN.update();
 
@@ -78,11 +86,20 @@ export class SimpleScene extends React.Component {
     }
 
     render() {
+        const canvasStyle = {
+            // paddingLeft: 0,
+            // paddingRight: 0,
+            // marginLeft: 'auto',
+            // marginRight: 'auto',
+            // display: 'block',
+        };
         return (
             <div>
                 <Control />
-                <hr/>
-                <canvas ref="canvas" width={800} height={600}/>
+                <div>
+                    <canvas ref="canvas" width={800} height={600} style={canvasStyle}/>
+                </div>
+
             </div>
         )
     }

@@ -1,11 +1,11 @@
 import React from 'react';
 import {connect} from 'react-redux';
 
-export class About extends React.Component {
+export class ArScene extends React.Component {
     render() {
         return (
             <div>
-                About 123
+                <canvas ref="canvas" width={800} height={600}/>
             </div>
         )
     }
@@ -22,4 +22,4 @@ export default connect(
     {
 
     }
-)(About)
+)(ArScene)

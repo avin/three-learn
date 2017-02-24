@@ -1,5 +1,10 @@
 import React, { PropTypes } from 'react';
-import { Link, IndexLink } from 'react-router';
+import {
+    Link,
+    IndexLink
+} from 'react-router';
+import classNames from 'classnames';
+import _ from 'lodash'
 
 class Layout extends React.Component {
     static propTypes = {
@@ -7,25 +12,48 @@ class Layout extends React.Component {
     };
 
     render() {
+        const currentRoute = this.props.location.pathname;
+
+        const menuItems = [
+            {
+                route: '/',
+                title: 'Home',
+            },
+            {
+                route: '/counter',
+                title: 'Counter',
+            },
+            {
+                route: '/simple-scene',
+                title: 'SimpleScene',
+            },
+            {
+                route: '/speedy-scene',
+                title: 'Speedy',
+            },
+            {
+                route: '/ar-scene',
+                title: 'AR',
+            },
+        ];
         return (
             <div>
-                <div>
-                    <IndexLink to="/">Home</IndexLink>
-                    {' | '}
-                    <Link to="/counter">Counter</Link>
-                    {' | '}
-                    <Link to="/simple-scene">SimpleScene</Link>
-                    {' | '}
-                    <Link to="/about">About</Link>
-
-                </div>
-                <hr/>
+                <nav className="pt-navbar pt-dark">
+                    <div className="pt-navbar-group pt-align-left">
+                        {menuItems.map(menuItem => (
+                            <Link key={menuItem.route}
+                                to={menuItem.route}
+                                className={classNames('pt-button pt-minimal', {'pt-active': currentRoute === menuItem.route})}>
+                                {menuItem.title}
+                            </Link>
+                        ))}
+                    </div>
+                </nav>
                 {this.props.children}
             </div>
         );
     }
 }
-
 
 
 export default Layout;

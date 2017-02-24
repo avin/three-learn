@@ -14,9 +14,11 @@ export class Counter extends React.Component {
     render() {
         const {value} = this.props;
         return (
-            <div>
+            <div style={{margin: 20}}>
                 Counter: {value}
+                <hr/>
                 <button type="button" onClick={this.handlePlus}>+</button>
+                &nbsp;
                 <button type="button" onClick={this.handleMinus}>-</button>
             </div>
         )
