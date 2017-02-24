@@ -14,6 +14,8 @@ class Layout extends React.Component {
                     {' | '}
                     <Link to="/counter">Counter</Link>
                     {' | '}
+                    <Link to="/simple-scene">SimpleScene</Link>
+                    {' | '}
                     <Link to="/about">About</Link>
                 </div>
                 <hr/>
