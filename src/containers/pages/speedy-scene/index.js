@@ -36,7 +36,7 @@ const ProceduralCity = function () {
 };
 
 
-export class SimpleScene extends React.Component {
+export class SpeedyScene extends React.Component {
 
     componentDidMount() {
         const canvasEl = this.refs.canvas;
@@ -120,4 +120,4 @@ function mapStateToProps(state, ownProps) {
 export default connect(
     mapStateToProps,
     {}
-)(SimpleScene)
+)(SpeedyScene)

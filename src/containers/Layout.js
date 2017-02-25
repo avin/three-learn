@@ -32,6 +32,10 @@ class Layout extends React.Component {
                 title: 'Speedy',
             },
             {
+                route: '/vr-scene',
+                title: 'VR',
+            },
+            {
                 route: '/ar-scene',
                 title: 'AR',
             },

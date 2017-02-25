@@ -64,6 +64,8 @@
     "three": "^0.84.0",
     "tween.js": "^16.6.0",
     "webpack": "^2.2.1",
-    "webpack-dev-server": "^2.4.1"
+    "webpack-dev-server": "^2.4.1",
+    "webvr-polyfill": "^0.9.25",
+    "worker-loader": "^0.7.1"
   }
 }

@@ -3,6 +3,9 @@ var webpack = require('webpack');
 
 module.exports = {
     entry: [
+        'babel-polyfill',
+        'webvr-polyfill',
+
         'react-hot-loader/patch',
         // activate HMR for React
 
