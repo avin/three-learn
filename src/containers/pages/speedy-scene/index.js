@@ -56,6 +56,7 @@ export class SpeedyScene extends React.Component {
         const renderer = new THREE.WebGLRenderer({
             canvas: canvasEl
         });
+        renderer.setPixelRatio( window.devicePixelRatio );
         renderer.setSize(width, height);
 
         //Add light
