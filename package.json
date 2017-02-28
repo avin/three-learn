@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^1.9.0",
+    "annyang": "^2.6.0",
     "babel": "^6.23.0",
     "babel-cli": "^6.23.0",
     "babel-core": "^6.23.1",
