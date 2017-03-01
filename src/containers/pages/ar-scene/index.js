@@ -4,16 +4,38 @@ import MediaDevices from '../../../lib/mediadevices';
 import screenfull from 'screenfull';
 import Stats from 'stats.js';
 import classNames from 'classnames';
+import annyang from 'annyang';
+import TWEEN from 'tween.js';
 
 window.THREE = require('three');
 
 require('script-loader!jsartoolkit/build/artoolkit.debug');
 require('script-loader!../../../lib/artoolkit/artoolkit.api.js');
 require('imports-loader?THREE=three!../../../lib/artoolkit/artoolkit.three');
+require('imports-loader?THREE=three!../../../lib/artoolkit/artoolkit.three');
+
+THREE.FBXLoader = require('imports-loader?THREE=three!exports-loader?THREE.FBXLoader!three/examples/js/loaders/FBXLoader2');
+THREE.AssimpJSONLoader = require('imports-loader?THREE=three!exports-loader?THREE.AssimpJSONLoader!three/examples/js/loaders/AssimpJSONLoader');
+THREE.OBJLoader = require('imports-loader?THREE=three!exports-loader?THREE.OBJLoader!three/examples/js/loaders/OBJLoader');
+THREE.MTLLoader = require('imports-loader?THREE=three!exports-loader?THREE.MTLLoader!three/examples/js/loaders/MTLLoader');
+
 
 //const ENABLE_FULLSCREEN = true;
 const ENABLE_FULLSCREEN = false;
 const PREVIEW_CAMERA_ON_SELECT = false;
+
+
+const onProgress = function (xhr) {
+    if (xhr.lengthComputable) {
+        const percentComplete = xhr.loaded / xhr.total * 100;
+        console.log(Math.round(percentComplete, 2) + '% downloaded');
+    }
+};
+
+const onError = function (xhr) {
+    console.warn(xhr);
+};
+
 
 export class ARScene extends React.Component {
 
@@ -21,11 +43,20 @@ export class ARScene extends React.Component {
         show: false,
         videoDevices: [],
         selectedVideoDevice: null,
-        CVQuality: 200,
+        CVQuality: 400,
         contentType: 1,
     };
 
     meshes = [];
+
+    constructor(props) {
+        super(props);
+
+        //подключаем распознавалку голоса
+        console.log(annyang);
+        annyang.debug();
+        annyang.setLanguage('ru');
+    }
 
     componentDidMount() {
         const devices = MediaDevices.getDevices().then(devs => {
@@ -91,6 +122,90 @@ export class ARScene extends React.Component {
             marker1.add(mesh1);
             this.meshes.push(mesh1);
             this.arScene.scene.add(marker1);
+
+            //ГОЛОС
+
+            // Add our commands to annyang
+            annyang.addCommands({
+                'поворот': () => {
+                    console.log('FIRE Поворот');
+                    new TWEEN.Tween(mesh1.rotation).to({z: mesh1.rotation.z + Math.PI / 2}, 3000)
+                        .easing(TWEEN.Easing.Elastic.Out)
+                        .start();
+                },
+                'прыжок': () => {
+                    const realPositionZ = mesh1.position.z;
+                    const tween = new TWEEN.Tween(mesh1.position)
+                        .to({z: mesh1.position.z + 1}, 500)
+                        .easing(TWEEN.Easing.Exponential.Out);
+                    const tweenBack = new TWEEN.Tween(mesh1.position)
+                        .to({z: realPositionZ}, 500)
+                        .easing(TWEEN.Easing.Exponential.In);
+
+
+                    tween.chain(tweenBack);
+                    tween.start();
+
+                    console.log('FIRE Прыжок');
+                },
+            });
+            annyang.start();
+        };
+
+        const setContent4 = () => {
+            const marker1 = this.arController.createThreeBarcodeMarker(20);
+
+            const manager = new THREE.LoadingManager();
+            manager.onProgress = function (item, loaded, total) {
+                console.log(item, loaded, total);
+            };
+
+
+            const mtlLoader = new THREE.MTLLoader();
+            mtlLoader.load( 'assets/models/valve/valve4.mtl', ( materials ) => {
+                materials.preload();
+                const objLoader = new THREE.OBJLoader();
+                objLoader.setMaterials( materials );
+                objLoader.load('assets/models/valve/valve4.obj', (object) => {
+
+                    //Увеличиваем размеры
+                    object.scale.set(10, 10, 10);
+
+                    //Меняем изначальную позицию
+                    _.merge(object.position, {
+                        y: -1,
+                        z: 0.5
+                    });
+                    //_.merge(object.rotation, {x: Math.PI / 2});
+
+                    this.meshes.push(object);
+                    marker1.add(object);
+                    this.arScene.scene.add(marker1);
+                }, (onProgress, onError ));
+            });
+        };
+
+        const setContent5 = () => {
+            const marker1 = this.arController.createThreeBarcodeMarker(20);
+            const mesh1 = new THREE.Mesh(
+                new THREE.BoxGeometry(1, 1, 1),
+                new THREE.MeshPhongMaterial({
+                    color: 0xFFFF00,
+                    shininess: 200,
+                    morphTargets: true,
+                    vertexColors: THREE.FaceColors,
+                    shading: THREE.FlatShading
+                })
+            );
+            console.log(mesh1);
+
+            mesh1.material.shading = THREE.FlatShading;
+            _.merge(mesh1.position, {x: -3, y: -0.9, z: -1});
+            _.merge(mesh1.scale, {x: 12, y: 4.5, z: 2});
+
+            marker1.add(mesh1);
+            this.meshes.push(mesh1);
+            this.arScene.scene.add(marker1);
         };
 
         switch (contentType) {
@@ -102,6 +217,12 @@ export class ARScene extends React.Component {
                 break;
             case 3:
                 setContent3();
+                break;
+            case 4:
+                setContent4();
+                break;
+            case 5:
+                setContent5();
                 break;
         }
     }
@@ -117,7 +238,6 @@ export class ARScene extends React.Component {
             stats.dom.style.right = '0px';
             stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
             this.refs.canvasContainer.appendChild(stats.dom);
-
 
             if (ENABLE_FULLSCREEN) {
                 if (screenfull.enabled) {
@@ -161,7 +281,7 @@ export class ARScene extends React.Component {
                     arController.setPatternDetectionMode(artoolkit.AR_MATRIX_CODE_DETECTION);
                     const renderer = this.renderer = new THREE.WebGLRenderer({
                         canvas: canvasEl,
-                        antialias: false
+                        antialias: true
                     });
 
                     //Меняем размемы рендера чтоб он полностью помещался в экран
@@ -210,6 +330,8 @@ export class ARScene extends React.Component {
                         arScene.process();
                         arScene.renderOn(renderer);
 
+                        TWEEN.update();
+
                         stats.end();
                         this.animationId = requestAnimationFrame(tick);
                     };
@@ -221,6 +343,11 @@ export class ARScene extends React.Component {
     };
 
     handleStop = () => new Promise((resolve, reject) => {
+        //Отключить голос
+        if (_.isFunction(annyang.stop)) {
+            annyang.stop();
+        }
+
         cancelAnimationFrame(this.animationId);// Stop the animation
 
         this.arScene = null;
@@ -310,6 +437,12 @@ export class ARScene extends React.Component {
         };
         return (
             <div ref="container" style={{position: 'relative'}} className="maring-15">
+
+                <video ref="videoTexture" autoPlay="true" loop playsInline style={{display: 'none'}}>
+                    <source src="assets/textures/sintel.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'/>
+                    <source src="assets/textures/sintel.ogv" type='video/ogg; codecs="theora, vorbis"'/>
+                </video>
+
                 <button
                     disabled={!selectedVideoDevice}
                     onClick={() => this.handleStart()}
@@ -348,12 +481,12 @@ export class ARScene extends React.Component {
                     }}>
                         <div style={{padding: 20}}>
                             <div className="controls pt-button-group">
-                                {[1, 2, 3].map(typeId => (
+                                {[1, 2, 3, 4, 5, 6, 7].map(typeId => (
                                     <button
                                         key={typeId}
                                         className={classNames('pt-button', {'pt-intent-success': typeId === contentType})}
                                         onClick={() => this.handleSetContentType(typeId)}>
-                                        content <strong>{typeId}</strong>
+                                        <strong>{typeId}</strong>
                                     </button>
                                 ))}
                             </div>
@@ -363,7 +496,8 @@ export class ARScene extends React.Component {
                                 <button className="pt-button pt-large pt-intent-warning" onClick={this.handleReInit}>
                                     RE-INIT
                                 </button>
-                                <button className="pt-button pt-large pt-intent-danger" onClick={this.handleStop}>STOP
+                                <button className="pt-button pt-large pt-intent-danger" onClick={this.handleStop}>
+                                    STOP
                                 </button>
                             </div>
                         </div>
