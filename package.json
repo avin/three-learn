@@ -10,7 +10,7 @@
   },
   "betterScripts": {
     "start-dev": {
-      "command": "webpack-dev-server",
+      "command": "webpack-dev-server --https --cert=ssl/server101.mycloud.crt --cacert=ssl/server101.mycloud.crt --key=ssl/server101.mycloud.key",
       "env": {
         "NODE_PATH": "./src",
         "NODE_ENV": "development",
@@ -45,6 +45,7 @@
     "exports-loader": "^0.6.3",
     "immutable": "^3.8.1",
     "imports-loader": "^0.7.0",
+    "ismobile": "^1.0.1",
     "jsartoolkit": "^0.0.0",
     "less": "^2.7.2",
     "less-loader": "^2.2.3",

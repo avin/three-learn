@@ -298,7 +298,7 @@ export class VRScene extends React.Component {
         };
         return (
             <div ref="container" style={{position: 'relative'}}>
-                <button onClick={() => this.handleStart()} className="pt-button pt-intent-primary pt-large maring-15">START VR</button>
+                <button onClick={() => this.handleStart()} className="pt-button pt-intent-primary pt-large maring-15">START Scene</button>
 
                 {show ?
                     <div style={canvasContainerStyle} ref="canvasContainer" onClick={() => {/*this.handleStop()*/}}>

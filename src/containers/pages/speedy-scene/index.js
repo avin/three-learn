@@ -3,6 +3,10 @@ import { connect } from 'react-redux';
 import Stats from 'stats.js';
 const THREE = require('three');
 
+THREE.VRControls = require('imports-loader?THREE=three!exports-loader?THREE.VRControls!three/examples/js/controls/VRControls');
+THREE.VREffect = require('imports-loader?THREE=three!exports-loader?THREE.VREffect!three/examples/js/effects/VREffect');
+const WEBVR = require('exports-loader?WEBVR!three/examples/js/vr/WebVR');
+
 
 const ProceduralCity = function () {
     // build the base geometry for each building
@@ -38,6 +42,10 @@ const ProceduralCity = function () {
 
 export class SpeedyScene extends React.Component {
 
+    state = {
+        effectIsPresenting: false,
+    };
+
     componentDidMount() {
         const canvasEl = this.refs.canvas;
         const rect = canvasEl.getBoundingClientRect();
@@ -56,8 +64,28 @@ export class SpeedyScene extends React.Component {
         const renderer = new THREE.WebGLRenderer({
             canvas: canvasEl
         });
-        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(width, height);
+
+        const controls = new THREE.VRControls(camera);
+        const effect = this.effect = new THREE.VREffect(renderer);
+
+        if (navigator.getVRDisplays) {
+
+            navigator.getVRDisplays()
+                .then(function (displays) {
+                    console.log(displays);
+                    effect.setVRDisplay(displays[0]);
+                    controls.setVRDisplay(displays[0]);
+                })
+                .catch(function () {
+                    // no displays
+                });
+
+            window.addEventListener('vrdisplaypresentchange', (event) => {
+                this.setState({effectIsPresenting: effect.isPresenting});
+            }, false);
+        }
 
         //Add light
         const light = new THREE.HemisphereLight(0xfffff0, 0x101020, 1.25);
@@ -88,27 +116,46 @@ export class SpeedyScene extends React.Component {
             requestAnimationFrame(render);
             stats.begin();
 
+            controls.update();
+
             camera.position.x = Math.cos(clock.getElapsedTime() / 7) * 500;
             camera.position.z = Math.sin(clock.getElapsedTime() / 7) * 100;
-            camera.position.y = Math.cos(clock.getElapsedTime() / 7) * 50 + 150;
+            camera.position.y = Math.cos(clock.getElapsedTime() / 7) * 50 + 100;
 
-            camera.lookAt({
-                x: Math.cos(clock.getElapsedTime() / 30) * 500,
-                y: 0,
-                z: Math.cos(clock.getElapsedTime() / 30) * 500,
-            });
+            // camera.lookAt({
+            //     x: Math.cos(clock.getElapsedTime() / 30) * 500,
+            //     y: 0,
+            //     z: Math.cos(clock.getElapsedTime() / 30) * 500,
+            // });
 
-            renderer.render(scene, camera);
+            effect.render( scene, camera );
+
             stats.end();
         };
 
         render();
     }
 
+    handleChangeVR = () => {
+        this.effect.isPresenting ? this.effect.exitPresent() : this.effect.requestPresent();
+
+        console.log(this.effect.isPresenting);
+    };
+
     render() {
+        const {effectIsPresenting} = this.state;
         return (
             <div ref="container" style={{position: 'relative'}}>
                 <canvas ref="canvas" width={800} height={600}/>
+                <button
+                    className="pt-button pt-large"
+                    onClick={this.handleChangeVR} style={{
+                    position: 'absolute',
+                    top: 20,
+                    left: 20
+                }}>
+                    {effectIsPresenting ? 'CLOSE VR' : 'GO VR'}
+                </button>
             </div>
         )
     }

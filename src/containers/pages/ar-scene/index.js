@@ -6,6 +6,7 @@ import Stats from 'stats.js';
 import classNames from 'classnames';
 import annyang from 'annyang';
 import TWEEN from 'tween.js';
+import isMobile from 'ismobile';
 
 window.THREE = require('three');
 
@@ -20,8 +21,7 @@ THREE.OBJLoader = require('imports-loader?THREE=three!exports-loader?THREE.OBJLo
 THREE.MTLLoader = require('imports-loader?THREE=three!exports-loader?THREE.MTLLoader!three/examples/js/loaders/MTLLoader');
 
 
-//const ENABLE_FULLSCREEN = true;
-const ENABLE_FULLSCREEN = false;
+const ENABLE_FULLSCREEN = isMobile.any; //для всех мобильных устройств включено
 const PREVIEW_CAMERA_ON_SELECT = false;
 
 
@@ -43,7 +43,7 @@ export class ARScene extends React.Component {
         show: false,
         videoDevices: [],
         selectedVideoDevice: null,
-        CVQuality: 400,
+        CVQuality: isMobile.any ? 150 : 400,
         contentType: 1,
     };
 
@@ -162,10 +162,10 @@ export class ARScene extends React.Component {
 
 
             const mtlLoader = new THREE.MTLLoader();
-            mtlLoader.load( 'assets/models/valve/valve4.mtl', ( materials ) => {
+            mtlLoader.load('assets/models/valve/valve4.mtl', (materials) => {
                 materials.preload();
                 const objLoader = new THREE.OBJLoader();
-                objLoader.setMaterials( materials );
+                objLoader.setMaterials(materials);
                 objLoader.load('assets/models/valve/valve4.obj', (object) => {
 
                     //Увеличиваем размеры
@@ -200,8 +200,16 @@ export class ARScene extends React.Component {
             console.log(mesh1);
 
             mesh1.material.shading = THREE.FlatShading;
-            _.merge(mesh1.position, {x: -3, y: -0.9, z: -1});
-            _.merge(mesh1.scale, {x: 12, y: 4.5, z: 2});
+            _.merge(mesh1.position, {
+                x: -3,
+                y: -0.9,
+                z: -1
+            });
+            _.merge(mesh1.scale, {
+                x: 12,
+                y: 4.5,
+                z: 2
+            });
 
             marker1.add(mesh1);
             this.meshes.push(mesh1);
@@ -272,6 +280,7 @@ export class ARScene extends React.Component {
 
                 cameraParam: 'assets/Data/camera_para-iPhone 5 rear 640x480 1.0m.dat',
                 //cameraParam: 'assets/Data/camera_para.dat',
+                hideMarkerTimeout: 0, //время через которое пропадает визуальный маркер со сцены
                 onSuccess: (arScene, arController, arCamera) => {
 
                     this.arScene = arScene;

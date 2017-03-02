@@ -5,8 +5,9 @@
         <meta name="viewport"
               content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <link rel="stylesheet" href="assets/css/blueprint.css">
-        <link rel="stylesheet" href="assets/css/flexboxgrid.min.css">
+        <link rel="manifest" href="/manifest.json">
+        <link rel="stylesheet" href="/assets/css/blueprint.css">
+        <link rel="stylesheet" href="/assets/css/flexboxgrid.min.css">
         <style>
             body, html {
                 margin: 0;
@@ -17,7 +18,16 @@
     <body>
 
         <div id="root"></div>
-        <script src="http://172.16.100.157:1337/vorlon.js"></script>
-        <script src="build/bundle.js"></script>
+        <script>
+            if (navigator.serviceWorker) {
+                navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope:',  registration.scope);
+                }).catch(function(error) {
+                    console.log('ServiceWorker registration failed:', error);
+                });
+            }
+        </script>
+        <!--<script src="http://172.16.100.157:1337/vorlon.js"></script>-->
+        <script src="/build/bundle.js"></script>
     </body>
 </html>

@@ -1,4 +1,5 @@
 /* THREE.js ARToolKit integration */
+import { averageArrToArr } from '../../helpers/math';
 
 (function() {
 	var integrate = function() {
@@ -43,6 +44,7 @@
 			var onSuccess = configuration.onSuccess;
 
 			obj.onSuccess = function(arController, arCameraParam) {
+                arController.hideMarkerTimeout = obj.hideMarkerTimeout || 0;
 				var scenes = arController.createThreeScene();
 				onSuccess(scenes, arController, arCameraParam);
 			};
@@ -80,6 +82,8 @@
 			@param video Video image to use as scene background. Defaults to this.image
 		*/
 		ARController.prototype.createThreeScene = function(video) {
+            console.log(this.hideMarkerTimeout);
+
 			video = video || this.image;
 
 			this.setupThree();
@@ -132,16 +136,21 @@
 
 				process: function() {
 					for (var i in self.threePatternMarkers) {
-						self.threePatternMarkers[i].visible = false;
+                        self.threePatternMarkers[i].hideTimout = setTimeout(() => {
+                            self.threePatternMarkers[i].visible = false;
+                        }, self.hideMarkerTimeout)
 					}
 					for (var i in self.threeBarcodeMarkers) {
-						self.threeBarcodeMarkers[i].visible = false;
+                        self.threeBarcodeMarkers[i].hideTimout = setTimeout(() => {
+                            self.threeBarcodeMarkers[i].visible = false;
+                        }, self.hideMarkerTimeout)
 					}
 					for (var i in self.threeMultiMarkers) {
-						self.threeMultiMarkers[i].visible = false;
 						for (var j=0; j<self.threeMultiMarkers[i].markers.length; j++) {
 							if (self.threeMultiMarkers[i].markers[j]) {
-								self.threeMultiMarkers[i].markers[j].visible = false;
+                                self.threeMultiMarkers[i].markers[j].hideTimout = setTimeout(() => {
+                                    self.threeMultiMarkers[i].markers[j].visible = false;
+                                }, self.hideMarkerTimeout)
 							}
 						}
 					}
@@ -256,8 +265,13 @@
 
 				}
 				if (obj) {
-					obj.matrix.elements.set(ev.data.matrix);
+					//obj.matrix.elements.set(ev.data.matrix);
+                    averageArrToArr(obj.matrix.elements, ev.data.matrix, 5);
 					obj.visible = true;
+
+                    if (obj.hideTimout){
+                        clearTimeout(obj.hideTimout);
+                    }
 				}
 			});
 

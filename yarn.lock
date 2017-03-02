@@ -2268,6 +2268,10 @@ isarray@1.0.0, isarray@^1.0.0, isarray@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/isarray/-/isarray-1.0.0.tgz#bb935d48582cba168c06834957a54a3e07124f11"
 
+ismobile@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/ismobile/-/ismobile-1.0.1.tgz#fb6224c31cbc746fbdbec28a2089049760686d04"
+
 isobject@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/isobject/-/isobject-2.1.0.tgz#f065561096a3f1da2ef46272f815c840d87e0c89"
