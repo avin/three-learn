@@ -17,9 +17,9 @@ export class VRScene extends React.Component {
 
     handleStart() {
         this.setState({show: true}, () => {
-            if ( WEBVR.isAvailable() === false ) {
+            if (WEBVR.isAvailable() === false) {
 
-                document.body.appendChild( WEBVR.getMessage() );
+                document.body.appendChild(WEBVR.getMessage());
 
             }
 
@@ -55,50 +55,45 @@ export class VRScene extends React.Component {
 
             function init() {
 
-                container = document.createElement( 'div' );
-                document.body.appendChild( container );
-
-                var info = document.createElement( 'div' );
-                info.style.position = 'absolute';
-                info.style.top = '10px';
-                info.style.width = '100%';
-                info.style.textAlign = 'center';
-                info.innerHTML = '<a href="http://threejs.org" target="_blank">three.js</a> webgl - interactive cubes';
-                container.appendChild( info );
+                container = document.createElement('div');
+                document.body.appendChild(container);
 
                 scene = new THREE.Scene();
 
-                camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10 );
-                scene.add( camera );
+                camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 10);
+                scene.add(camera);
 
                 crosshair = new THREE.Mesh(
-                    new THREE.RingGeometry( 0.02, 0.04, 32 ),
-                    new THREE.MeshBasicMaterial( {
+                    new THREE.RingGeometry(0.02, 0.04, 32),
+                    new THREE.MeshBasicMaterial({
                         color: 0xffffff,
                         opacity: 0.5,
                         transparent: true
-                    } )
+                    })
                 );
-                crosshair.position.z = - 2;
-                camera.add( crosshair );
+                crosshair.position.z = -2;
+                camera.add(crosshair);
 
                 room = new THREE.Mesh(
-                    new THREE.BoxGeometry( 6, 6, 6, 8, 8, 8 ),
-                    new THREE.MeshBasicMaterial( { color: 0x404040, wireframe: true } )
+                    new THREE.BoxGeometry(6, 6, 6, 8, 8, 8),
+                    new THREE.MeshBasicMaterial({
+                        color: 0x404040,
+                        wireframe: true
+                    })
                 );
-                scene.add( room );
+                scene.add(room);
 
-                scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
+                scene.add(new THREE.HemisphereLight(0x606060, 0x404040));
 
-                var light = new THREE.DirectionalLight( 0xffffff );
-                light.position.set( 1, 1, 1 ).normalize();
-                scene.add( light );
+                const light = new THREE.DirectionalLight(0xffffff);
+                light.position.set(1, 1, 1).normalize();
+                scene.add(light);
 
-                var geometry = new THREE.BoxGeometry( 0.15, 0.15, 0.15 );
+                var geometry = new THREE.BoxGeometry(0.15, 0.15, 0.15);
 
-                for ( var i = 0; i < 200; i ++ ) {
+                for (var i = 0; i < 200; i++) {
 
-                    var object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
+                    var object = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({color: Math.random() * 0xffffff}));
 
                     object.position.x = Math.random() * 4 - 2;
                     object.position.y = Math.random() * 4 - 2;
@@ -117,45 +112,44 @@ export class VRScene extends React.Component {
                     object.userData.velocity.y = Math.random() * 0.01 - 0.005;
                     object.userData.velocity.z = Math.random() * 0.01 - 0.005;
 
-                    room.add( object );
+                    room.add(object);
 
                 }
 
                 raycaster = new THREE.Raycaster();
 
-                renderer = new THREE.WebGLRenderer( { canvas: canvasEl, antialias: true } );
-                renderer.setClearColor( 0x505050 );
-                renderer.setPixelRatio( window.devicePixelRatio );
-                renderer.setSize( window.innerWidth, window.innerHeight );
+                renderer = new THREE.WebGLRenderer({
+                    canvas: canvasEl,
+                    antialias: true
+                });
+                renderer.setClearColor(0x505050);
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.setSize(window.innerWidth, window.innerHeight);
                 renderer.sortObjects = false;
 
-                controls = new THREE.VRControls( camera );
-                effect = new THREE.VREffect( renderer );
+                controls = new THREE.VRControls(camera);
+                effect = new THREE.VREffect(renderer);
 
-                if ( navigator.getVRDisplays ) {
+                if (navigator.getVRDisplays) {
 
                     navigator.getVRDisplays()
-                        .then( function ( displays ) {
-                            effect.setVRDisplay( displays[ 0 ] );
-                            controls.setVRDisplay( displays[ 0 ] );
-                        } )
-                        .catch( function () {
+                        .then(function (displays) {
+                            effect.setVRDisplay(displays[0]);
+                            controls.setVRDisplay(displays[0]);
+                        })
+                        .catch(function () {
                             // no displays
-                        } );
+                        });
 
-                    document.body.appendChild( WEBVR.getButton( effect ) );
-
+                    document.body.appendChild(WEBVR.getButton(effect));
                 }
 
-                renderer.domElement.addEventListener( 'mousedown', onMouseDown, false );
-                renderer.domElement.addEventListener( 'mouseup', onMouseUp, false );
-                renderer.domElement.addEventListener( 'touchstart', onMouseDown, false );
-                renderer.domElement.addEventListener( 'touchend', onMouseUp, false );
+                renderer.domElement.addEventListener('mousedown', onMouseDown, false);
+                renderer.domElement.addEventListener('mouseup', onMouseUp, false);
+                renderer.domElement.addEventListener('touchstart', onMouseDown, false);
+                renderer.domElement.addEventListener('touchend', onMouseUp, false);
 
-                //
-
-                window.addEventListener( 'resize', onWindowResize, false );
-
+                window.addEventListener('resize', onWindowResize, false);
             }
 
             function onMouseDown() {
@@ -175,7 +169,7 @@ export class VRScene extends React.Component {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
 
-                effect.setSize( window.innerWidth, window.innerHeight );
+                effect.setSize(window.innerWidth, window.innerHeight);
 
             }
 
@@ -183,7 +177,7 @@ export class VRScene extends React.Component {
 
             function animate() {
 
-                effect.requestAnimationFrame( animate );
+                effect.requestAnimationFrame(animate);
                 render();
 
             }
@@ -192,42 +186,45 @@ export class VRScene extends React.Component {
 
                 var delta = clock.getDelta() * 60;
 
-                if ( isMouseDown === true ) {
+                if (isMouseDown === true) {
 
-                    var cube = room.children[ 0 ];
-                    room.remove( cube );
+                    var cube = room.children[0];
+                    room.remove(cube);
 
-                    cube.position.set( 0, 0, - 0.75 );
-                    cube.position.applyQuaternion( camera.quaternion );
+                    cube.position.set(0, 0, -0.75);
+                    cube.position.applyQuaternion(camera.quaternion);
                     cube.userData.velocity.x = ( Math.random() - 0.5 ) * 0.02 * delta;
                     cube.userData.velocity.y = ( Math.random() - 0.5 ) * 0.02 * delta;
                     cube.userData.velocity.z = ( Math.random() * 0.01 - 0.05 ) * delta;
-                    cube.userData.velocity.applyQuaternion( camera.quaternion );
-                    room.add( cube );
+                    cube.userData.velocity.applyQuaternion(camera.quaternion);
+                    room.add(cube);
 
                 }
 
                 // find intersections
 
-                raycaster.setFromCamera( { x: 0, y: 0 }, camera );
+                raycaster.setFromCamera({
+                    x: 0,
+                    y: 0
+                }, camera);
 
-                var intersects = raycaster.intersectObjects( room.children );
+                var intersects = raycaster.intersectObjects(room.children);
 
-                if ( intersects.length > 0 ) {
+                if (intersects.length > 0) {
 
-                    if ( INTERSECTED != intersects[ 0 ].object ) {
+                    if (INTERSECTED != intersects[0].object) {
 
-                        if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+                        if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
 
-                        INTERSECTED = intersects[ 0 ].object;
+                        INTERSECTED = intersects[0].object;
                         INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-                        INTERSECTED.material.emissive.setHex( 0xff0000 );
+                        INTERSECTED.material.emissive.setHex(0xff0000);
 
                     }
 
                 } else {
 
-                    if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+                    if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
 
                     INTERSECTED = undefined;
 
@@ -235,32 +232,32 @@ export class VRScene extends React.Component {
 
                 // Keep cubes inside room
 
-                for ( var i = 0; i < room.children.length; i ++ ) {
+                for (var i = 0; i < room.children.length; i++) {
 
-                    var cube = room.children[ i ];
+                    var cube = room.children[i];
 
-                    cube.userData.velocity.multiplyScalar( 1 - ( 0.001 * delta ) );
+                    cube.userData.velocity.multiplyScalar(1 - ( 0.001 * delta ));
 
-                    cube.position.add( cube.userData.velocity );
+                    cube.position.add(cube.userData.velocity);
 
-                    if ( cube.position.x < - 3 || cube.position.x > 3 ) {
+                    if (cube.position.x < -3 || cube.position.x > 3) {
 
-                        cube.position.x = THREE.Math.clamp( cube.position.x, - 3, 3 );
-                        cube.userData.velocity.x = - cube.userData.velocity.x;
-
-                    }
-
-                    if ( cube.position.y < - 3 || cube.position.y > 3 ) {
-
-                        cube.position.y = THREE.Math.clamp( cube.position.y, - 3, 3 );
-                        cube.userData.velocity.y = - cube.userData.velocity.y;
+                        cube.position.x = THREE.Math.clamp(cube.position.x, -3, 3);
+                        cube.userData.velocity.x = -cube.userData.velocity.x;
 
                     }
 
-                    if ( cube.position.z < - 3 || cube.position.z > 3 ) {
+                    if (cube.position.y < -3 || cube.position.y > 3) {
 
-                        cube.position.z = THREE.Math.clamp( cube.position.z, - 3, 3 );
-                        cube.userData.velocity.z = - cube.userData.velocity.z;
+                        cube.position.y = THREE.Math.clamp(cube.position.y, -3, 3);
+                        cube.userData.velocity.y = -cube.userData.velocity.y;
+
+                    }
+
+                    if (cube.position.z < -3 || cube.position.z > 3) {
+
+                        cube.position.z = THREE.Math.clamp(cube.position.z, -3, 3);
+                        cube.userData.velocity.z = -cube.userData.velocity.z;
 
                     }
 
@@ -271,7 +268,7 @@ export class VRScene extends React.Component {
                 }
 
                 controls.update();
-                effect.render( scene, camera );
+                effect.render(scene, camera);
 
             }
 
@@ -298,10 +295,13 @@ export class VRScene extends React.Component {
         };
         return (
             <div ref="container" style={{position: 'relative'}}>
-                <button onClick={() => this.handleStart()} className="pt-button pt-intent-primary pt-large maring-15">START Scene</button>
+                <button onClick={() => this.handleStart()} className="pt-button pt-intent-primary pt-large maring-15">
+                    START Scene
+                </button>
 
                 {show ?
-                    <div style={canvasContainerStyle} ref="canvasContainer" onClick={() => {/*this.handleStop()*/}}>
+                    <div style={canvasContainerStyle} ref="canvasContainer" onClick={() => {/*this.handleStop()*/
+                    }}>
                         <canvas ref="canvas" width={800} height={600}/>
                     </div>
                     : null}

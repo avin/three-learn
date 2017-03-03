@@ -5,12 +5,10 @@ const THREE = require('three');
 
 THREE.VRControls = require('imports-loader?THREE=three!exports-loader?THREE.VRControls!three/examples/js/controls/VRControls');
 THREE.VREffect = require('imports-loader?THREE=three!exports-loader?THREE.VREffect!three/examples/js/effects/VREffect');
-const WEBVR = require('exports-loader?WEBVR!three/examples/js/vr/WebVR');
 
 
 const ProceduralCity = function () {
     // build the base geometry for each building
-    //const geometry = new THREE.CubeGeometry(1, 1, 1);
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     // translate the geometry to place the pivot point at the bottom instead of the center
     geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0.5, 0));
@@ -47,6 +45,8 @@ export class SpeedyScene extends React.Component {
     };
 
     componentDidMount() {
+        const {effectIsPresenting} = this.state;
+
         const canvasEl = this.refs.canvas;
         const rect = canvasEl.getBoundingClientRect();
 
@@ -100,12 +100,13 @@ export class SpeedyScene extends React.Component {
         scene.add(plane);
 
         //Generate and add city
-        var city = ProceduralCity();
+        const city = ProceduralCity();
         scene.add(city);
 
         let clock = new THREE.Clock();
 
-        var stats = new Stats();
+        //FPS-meter
+        const stats = new Stats();
         stats.dom.style.position = 'absolute';
         stats.dom.style.left = '';
         stats.dom.style.right = '0px';
@@ -122,13 +123,16 @@ export class SpeedyScene extends React.Component {
             camera.position.z = Math.sin(clock.getElapsedTime() / 7) * 100;
             camera.position.y = Math.cos(clock.getElapsedTime() / 7) * 50 + 100;
 
-            // camera.lookAt({
-            //     x: Math.cos(clock.getElapsedTime() / 30) * 500,
-            //     y: 0,
-            //     z: Math.cos(clock.getElapsedTime() / 30) * 500,
-            // });
+            //Если не включен ВР - камера вращается сама
+            if (!effectIsPresenting) {
+                camera.lookAt({
+                    x: Math.cos(clock.getElapsedTime() / 30) * 500,
+                    y: 0,
+                    z: Math.cos(clock.getElapsedTime() / 30) * 500,
+                });
+            }
 
-            effect.render( scene, camera );
+            effect.render(scene, camera);
 
             stats.end();
         };
@@ -136,10 +140,9 @@ export class SpeedyScene extends React.Component {
         render();
     }
 
+    //Включить/выключить ВР
     handleChangeVR = () => {
         this.effect.isPresenting ? this.effect.exitPresent() : this.effect.requestPresent();
-
-        console.log(this.effect.isPresenting);
     };
 
     render() {

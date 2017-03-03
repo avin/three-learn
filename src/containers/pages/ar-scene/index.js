@@ -6,7 +6,7 @@ import Stats from 'stats.js';
 import classNames from 'classnames';
 import annyang from 'annyang';
 import TWEEN from 'tween.js';
-import isMobile from 'ismobile';
+import isMobile from 'ismobilejs';
 
 window.THREE = require('three');
 
@@ -20,10 +20,13 @@ THREE.AssimpJSONLoader = require('imports-loader?THREE=three!exports-loader?THRE
 THREE.OBJLoader = require('imports-loader?THREE=three!exports-loader?THREE.OBJLoader!three/examples/js/loaders/OBJLoader');
 THREE.MTLLoader = require('imports-loader?THREE=three!exports-loader?THREE.MTLLoader!three/examples/js/loaders/MTLLoader');
 
+THREE.VRControls = require('imports-loader?THREE=three!exports-loader?THREE.VRControls!three/examples/js/controls/VRControls');
+THREE.VREffect = require('imports-loader?THREE=three!exports-loader?THREE.VREffect!three/examples/js/effects/VREffect');
+THREE.StereoEffect = require('imports-loader?THREE=three!exports-loader?THREE.StereoEffect!three/examples/js/effects/StereoEffect');
+
 
 const ENABLE_FULLSCREEN = isMobile.any; //для всех мобильных устройств включено
 const PREVIEW_CAMERA_ON_SELECT = false;
-
 
 const onProgress = function (xhr) {
     if (xhr.lengthComputable) {
@@ -45,6 +48,7 @@ export class ARScene extends React.Component {
         selectedVideoDevice: null,
         CVQuality: isMobile.any ? 150 : 400,
         contentType: 1,
+        effectIsPresenting: false,
     };
 
     meshes = [];
@@ -138,7 +142,7 @@ export class ARScene extends React.Component {
                     const tween = new TWEEN.Tween(mesh1.position)
                         .to({z: mesh1.position.z + 1}, 500)
                         .easing(TWEEN.Easing.Exponential.Out);
-                    const tweenBack = new TWEEN.Tween(mesh1.position)
+                    const tweenBack = new TWEEN.Taween(mesh1.position)
                         .to({z: realPositionZ}, 500)
                         .easing(TWEEN.Easing.Exponential.In);
 
@@ -149,7 +153,10 @@ export class ARScene extends React.Component {
                     console.log('FIRE Прыжок');
                 },
             });
-            annyang.start();
+            annyang.start({
+                autoRestart: true,
+                continuous: false
+            });
         };
 
         const setContent4 = () => {
@@ -315,6 +322,28 @@ export class ARScene extends React.Component {
 
                     renderer.setPixelRatio(window.devicePixelRatio);
                     renderer.setSize(width, height);
+                    renderer.setClearColor (0x111111, .5);
+
+
+                    //const effect = this.effect = new THREE.VREffect(renderer);
+                    const effect = this.effect = new THREE.StereoEffect(renderer);
+
+                    // if (navigator.getVRDisplays) {
+                    //
+                    //     navigator.getVRDisplays()
+                    //         .then(function (displays) {
+                    //             console.log('DISPLAYS', displays);
+                    //             effect.setVRDisplay(displays[0]);
+                    //             //controls.setVRDisplay(displays[0]);
+                    //         })
+                    //         .catch(function () {
+                    //             // no displays
+                    //         });
+                    //
+                    //     window.addEventListener('vrdisplaypresentchange', (event) => {
+                    //         this.setState({effectIsPresenting: effect.isPresenting});
+                    //     }, false);
+                    // }
 
                     //Добавляем свет на сцену
                     var lights = [];
@@ -337,7 +366,8 @@ export class ARScene extends React.Component {
                         stats.begin();
 
                         arScene.process();
-                        arScene.renderOn(renderer);
+                        arScene.renderOn(renderer, effect);
+                        //arScene.renderOn(renderer);
 
                         TWEEN.update();
 
@@ -349,6 +379,11 @@ export class ARScene extends React.Component {
             });
 
         })
+    };
+
+    //Включить/выключить ВР
+    handleChangeVR = () => {
+        this.effect.isPresenting ? this.effect.exitPresent() : this.effect.requestPresent();
     };
 
     handleStop = () => new Promise((resolve, reject) => {
@@ -434,7 +469,7 @@ export class ARScene extends React.Component {
     };
 
     render() {
-        const {show, selectedVideoDevice, CVQuality, contentType} = this.state;
+        const {show, selectedVideoDevice, CVQuality, contentType, effectIsPresenting} = this.state;
         const canvasContainerStyle = {
             position: 'fixed',
             zIndex: 10,
@@ -507,6 +542,11 @@ export class ARScene extends React.Component {
                                 </button>
                                 <button className="pt-button pt-large pt-intent-danger" onClick={this.handleStop}>
                                     STOP
+                                </button>
+                                <button
+                                    className="pt-button pt-large"
+                                    onClick={this.handleChangeVR} style={{}}>
+                                    {effectIsPresenting ? 'CLOSE VR' : 'GO VR'}
                                 </button>
                             </div>
                         </div>
