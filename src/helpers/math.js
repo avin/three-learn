@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
-export function averageArrToArr(srcArr, dstArr, ratio=1) {
+export function averageArrToArr(srcArr, dstArr, ratio=2) {
     _.each(srcArr, (arrItem, index) => {
-        srcArr[index] = (arrItem + dstArr[index])/(2*ratio);
+        srcArr[index] = (arrItem + dstArr[index])/(ratio);
     });
 }

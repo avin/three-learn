@@ -82,48 +82,58 @@ import { averageArrToArr } from '../../helpers/math';
          @param video Video image to use as scene background. Defaults to this.image
          */
         ARController.prototype.createThreeScene = function (video) {
-            console.log(this.hideMarkerTimeout);
-
             video = video || this.image;
 
             this.setupThree();
 
-            // To display the video, first create a texture from it.
-            var videoTex = new THREE.Texture(video);
-
-            videoTex.minFilter = THREE.LinearFilter;
-            videoTex.flipY = false;
-
-            // Then create a plane textured with the video.
-            var plane = new THREE.Mesh(
-                new THREE.PlaneBufferGeometry(2, 2),
-                new THREE.MeshBasicMaterial({
-                    map: videoTex,
-                    side: THREE.DoubleSide
-                })
-            );
-
-            // The video plane shouldn't care about the z-buffer.
-            plane.material.depthTest = false;
-            plane.material.depthWrite = false;
-
-            // Create a camera and a scene for the video plane and
-            // add the camera and the video plane to the scene.
-            var videoCamera = new THREE.OrthographicCamera(-1, 1, -1, 1, -1, 1);
-            var videoScene = new THREE.Scene();
-            videoScene.add(plane);
-            videoScene.add(videoCamera);
-
-            if (this.orientation === 'portrait') {
-                plane.rotation.z = Math.PI / 2;
-            }
+            var videoScene;
+            var videoCamera;
 
             var scene = new THREE.Scene();
+
+            if (this.orientation === 'portrait'){
+                // To display the video, first create a texture from it.
+                var videoTex = new THREE.Texture(video);
+
+                videoTex.minFilter = THREE.LinearFilter;
+                videoTex.flipY = false;
+
+                // Then create a plane textured with the video.
+                var plane = new THREE.Mesh(
+                    new THREE.PlaneBufferGeometry(2, 2),
+                    new THREE.MeshBasicMaterial({
+                        map: videoTex,
+                        side: THREE.DoubleSide
+                    })
+                );
+
+                // The video plane shouldn't care about the z-buffer.
+                plane.material.depthTest = false;
+                plane.material.depthWrite = false;
+
+                // Create a camera and a scene for the video plane and
+                // add the camera and the video plane to the scene.
+                videoCamera = new THREE.OrthographicCamera(-1, 1, -1, 1, -1, 1);
+                videoScene = new THREE.Scene();
+                videoScene.add(plane);
+                videoScene.add(videoCamera);
+
+
+                plane.rotation.z = Math.PI / 2;
+            } else {
+                // To display the video, first create a texture from it.
+                var videoTex = new THREE.VideoTexture(video);
+
+                videoTex.minFilter = THREE.LinearFilter;
+                videoTex.flipY = true;
+
+                scene.background = videoTex;
+            }
+
             var camera = new THREE.Camera();
             camera.projectionMatrix.elements.set(this.getCameraMatrix());
 
             scene.add(camera);
-
 
             var self = this;
 
@@ -164,22 +174,21 @@ import { averageArrToArr } from '../../helpers/math';
                     videoTex.needsUpdate = true;
 
                     if (effect) {
-
-
                         const ac = renderer.autoClear;
                         renderer.autoClear = false;
                         renderer.clear();
 
-                        effect.render(this.videoScene, this.videoCamera);
+                        if (this.videoScene && this.videoCamera){
+                            effect.render(this.videoScene, this.videoCamera);
+                        }
                         effect.render(this.scene, this.camera);
 
                         renderer.autoClear = ac;
-
                     } else {
                         const ac = renderer.autoClear;
                         renderer.autoClear = false;
                         renderer.clear();
-                        renderer.render(this.videoScene, this.videoCamera);
+                        //renderer.render(this.videoScene, this.videoCamera);
                         renderer.render(this.scene, this.camera);
                         renderer.autoClear = ac;
                     }
@@ -283,7 +292,7 @@ import { averageArrToArr } from '../../helpers/math';
                 }
                 if (obj) {
                     //obj.matrix.elements.set(ev.data.matrix);
-                    averageArrToArr(obj.matrix.elements, ev.data.matrix, 5);
+                    averageArrToArr(obj.matrix.elements, ev.data.matrix, 1.5);
                     obj.visible = true;
 
                     if (obj.hideTimout) {

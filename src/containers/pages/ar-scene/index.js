@@ -49,6 +49,7 @@ export class ARScene extends React.Component {
         CVQuality: isMobile.any ? 150 : 400,
         contentType: 1,
         effectIsPresenting: false,
+        orientation: 'unknown'
     };
 
     meshes = [];
@@ -194,33 +195,70 @@ export class ARScene extends React.Component {
 
         const setContent5 = () => {
             const marker1 = this.arController.createThreeBarcodeMarker(20);
-            const mesh1 = new THREE.Mesh(
-                new THREE.BoxGeometry(1, 1, 1),
-                new THREE.MeshPhongMaterial({
-                    color: 0xFFFF00,
-                    shininess: 200,
-                    morphTargets: true,
-                    vertexColors: THREE.FaceColors,
-                    shading: THREE.FlatShading
-                })
-            );
-            console.log(mesh1);
 
-            mesh1.material.shading = THREE.FlatShading;
-            _.merge(mesh1.position, {
-                x: -3,
-                y: -0.9,
-                z: -1
+            const manager = new THREE.LoadingManager();
+            manager.onProgress = function (item, loaded, total) {
+                console.log(item, loaded, total);
+            };
+
+            const mtlLoader = new THREE.MTLLoader();
+            mtlLoader.load('assets/models/kol/m.mtl', (materials) => {
+                materials.preload();
+                const objLoader = new THREE.OBJLoader();
+                objLoader.setMaterials(materials);
+                objLoader.load('assets/models/kol/m.obj', (object) => {
+
+                    //Увеличиваем размеры
+                    object.scale.set(3, 3, 3);
+
+                    //Меняем изначальную позицию
+                    _.merge(object.position, {
+                        y: -2,
+                        z: 0.5
+                    });
+                    _.merge(object.rotation, {x: Math.PI / 2});
+                    _.merge(object.rotation, {y: -Math.PI / 2});
+                    _.merge(object.rotation, {z: Math.PI / 2});
+
+                    this.meshes.push(object);
+                    marker1.add(object);
+                    this.arScene.scene.add(marker1);
+                }, (onProgress, onError ));
             });
-            _.merge(mesh1.scale, {
-                x: 12,
-                y: 4.5,
-                z: 2
+        };
+
+
+        const setContent6 = () => {
+            const marker1 = this.arController.createThreeBarcodeMarker(20);
+
+            const manager = new THREE.LoadingManager();
+            manager.onProgress = function (item, loaded, total) {
+                console.log(item, loaded, total);
+            };
+
+            const mtlLoader = new THREE.MTLLoader();
+            mtlLoader.load('assets/models/boxy/m.mtl', (materials) => {
+                materials.preload();
+                const objLoader = new THREE.OBJLoader();
+                objLoader.setMaterials(materials);
+                objLoader.load('assets/models/boxy/m.obj', (object) => {
+
+                    //Увеличиваем размеры
+                    object.scale.set(0.50, 0.50, 0.50);
+
+                    //Меняем изначальную позицию
+                    // _.merge(object.position, {
+                    //     y: -1,
+                    //     z: 0.5
+                    // });
+                    //_.merge(object.rotation, {x: Math.PI / 2});
+
+                    this.meshes.push(object);
+                    marker1.add(object);
+                    this.arScene.scene.add(marker1);
+                }, (onProgress, onError ));
             });
 
-            marker1.add(mesh1);
-            this.meshes.push(mesh1);
-            this.arScene.scene.add(marker1);
         };
 
         switch (contentType) {
@@ -239,6 +277,9 @@ export class ARScene extends React.Component {
             case 5:
                 setContent5();
                 break;
+            case 6:
+                setContent6();
+                break;
         }
     }
 
@@ -251,7 +292,7 @@ export class ARScene extends React.Component {
             stats.dom.style.position = 'absolute';
             stats.dom.style.left = '';
             stats.dom.style.right = '0px';
-            stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+            stats.showPanel(500); // 0: fps, 1: ms, 2: mb, 3+: custom
             this.refs.canvasContainer.appendChild(stats.dom);
 
             if (ENABLE_FULLSCREEN) {
@@ -320,30 +361,32 @@ export class ARScene extends React.Component {
                         canvasEl.style.left = `-${(width - height) / 2}px`
                     }
 
+                    this.setState({orientation});
+
                     renderer.setPixelRatio(window.devicePixelRatio);
                     renderer.setSize(width, height);
                     renderer.setClearColor (0x111111, .5);
 
 
-                    //const effect = this.effect = new THREE.VREffect(renderer);
-                    const effect = this.effect = new THREE.StereoEffect(renderer);
+                    const effect = this.effect = new THREE.VREffect(renderer);
+                    //const effect = this.effect = new THREE.StereoEffect(renderer);
 
-                    // if (navigator.getVRDisplays) {
-                    //
-                    //     navigator.getVRDisplays()
-                    //         .then(function (displays) {
-                    //             console.log('DISPLAYS', displays);
-                    //             effect.setVRDisplay(displays[0]);
-                    //             //controls.setVRDisplay(displays[0]);
-                    //         })
-                    //         .catch(function () {
-                    //             // no displays
-                    //         });
-                    //
-                    //     window.addEventListener('vrdisplaypresentchange', (event) => {
-                    //         this.setState({effectIsPresenting: effect.isPresenting});
-                    //     }, false);
-                    // }
+                    if (navigator.getVRDisplays) {
+
+                        navigator.getVRDisplays()
+                            .then(function (displays) {
+                                console.log('DISPLAYS', displays);
+                                effect.setVRDisplay(displays[0]);
+                                //controls.setVRDisplay(displays[0]);
+                            })
+                            .catch(function () {
+                                // no displays
+                            });
+
+                        window.addEventListener('vrdisplaypresentchange', (event) => {
+                            this.setState({effectIsPresenting: effect.isPresenting});
+                        }, false);
+                    }
 
                     //Добавляем свет на сцену
                     var lights = [];
@@ -359,6 +402,14 @@ export class ARScene extends React.Component {
                     arScene.scene.add(lights[1]);
                     arScene.scene.add(lights[2]);
 
+                    console.log(arScene.scene);
+                    // var texture = new THREE.TextureLoader().load( "assets/img/icon-horizontal.png" );
+                    // texture.wrapS = THREE.RepeatWrapping;
+                    // texture.wrapT = THREE.RepeatWrapping;
+                    // texture.repeat.set( 1, 1 );
+                    //
+                    // arScene.scene.background = texture;
+
                     //Наполняем содержимым в зависимости от выбранного типа контента
                     this.sceneFill();
 
@@ -366,8 +417,8 @@ export class ARScene extends React.Component {
                         stats.begin();
 
                         arScene.process();
+
                         arScene.renderOn(renderer, effect);
-                        //arScene.renderOn(renderer);
 
                         TWEEN.update();
 
@@ -392,12 +443,12 @@ export class ARScene extends React.Component {
             annyang.stop();
         }
 
-        cancelAnimationFrame(this.animationId);// Stop the animation
+        this.animationId && cancelAnimationFrame(this.animationId);// Stop the animation
 
         this.arScene = null;
-        this.arController.dispose();
+        this.arController && this.arController.dispose();
         this.arCamera = null;
-        this.renderer.dispose();
+        this.renderer && this.renderer.dispose();
 
 
         if (window.stream) {
@@ -469,7 +520,7 @@ export class ARScene extends React.Component {
     };
 
     render() {
-        const {show, selectedVideoDevice, CVQuality, contentType, effectIsPresenting} = this.state;
+        const {show, selectedVideoDevice, CVQuality, contentType, effectIsPresenting, orientation} = this.state;
         const canvasContainerStyle = {
             position: 'fixed',
             zIndex: 10,
@@ -543,11 +594,13 @@ export class ARScene extends React.Component {
                                 <button className="pt-button pt-large pt-intent-danger" onClick={this.handleStop}>
                                     STOP
                                 </button>
-                                <button
-                                    className="pt-button pt-large"
-                                    onClick={this.handleChangeVR} style={{}}>
-                                    {effectIsPresenting ? 'CLOSE VR' : 'GO VR'}
-                                </button>
+                                {orientation === 'landscape' ?
+                                    <button
+                                        className="pt-button pt-large"
+                                        onClick={this.handleChangeVR} style={{}}>
+                                        {effectIsPresenting ? 'CLOSE VR' : 'GO VR'}
+                                    </button>
+                                    : null}
                             </div>
                         </div>
 
