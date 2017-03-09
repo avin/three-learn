@@ -143,7 +143,7 @@ export class ARScene extends React.Component {
                     const tween = new TWEEN.Tween(mesh1.position)
                         .to({z: mesh1.position.z + 1}, 500)
                         .easing(TWEEN.Easing.Exponential.Out);
-                    const tweenBack = new TWEEN.Taween(mesh1.position)
+                    const tweenBack = new TWEEN.Tween(mesh1.position)
                         .to({z: realPositionZ}, 500)
                         .easing(TWEEN.Easing.Exponential.In);
 
@@ -328,7 +328,8 @@ export class ARScene extends React.Component {
 
                 cameraParam: 'assets/Data/camera_para-iPhone 5 rear 640x480 1.0m.dat',
                 //cameraParam: 'assets/Data/camera_para.dat',
-                hideMarkerTimeout: 0, //время через которое пропадает визуальный маркер со сцены
+                hideMarkerTimeout: 500, //время через которое пропадает визуальный маркер со сцены
+                moveMarkerFactor: 1.5,
                 onSuccess: (arScene, arController, arCamera) => {
 
                     this.arScene = arScene;

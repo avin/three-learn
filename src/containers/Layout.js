@@ -20,8 +20,8 @@ class Layout extends React.Component {
                 title: 'Home',
             },
             {
-                route: '/counter',
-                title: 'Counter',
+                route: '/animation',
+                title: 'Animate',
             },
             {
                 route: '/simple-scene',

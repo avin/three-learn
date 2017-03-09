@@ -45,6 +45,7 @@ import { averageArrToArr } from '../../helpers/math';
 
             obj.onSuccess = function (arController, arCameraParam) {
                 arController.hideMarkerTimeout = obj.hideMarkerTimeout || 0;
+                arController.moveMarkerFactor = obj.moveMarkerFactor || 2;
                 var scenes = arController.createThreeScene();
                 onSuccess(scenes, arController, arCameraParam);
             };
@@ -277,6 +278,8 @@ import { averageArrToArr } from '../../helpers/math';
             }
             this.THREE_JS_ENABLED = true;
 
+            var self = this;
+
             /*
              Listen to getMarker events to keep track of Three.js markers.
              */
@@ -292,7 +295,7 @@ import { averageArrToArr } from '../../helpers/math';
                 }
                 if (obj) {
                     //obj.matrix.elements.set(ev.data.matrix);
-                    averageArrToArr(obj.matrix.elements, ev.data.matrix, 1.5);
+                    averageArrToArr(obj.matrix.elements, ev.data.matrix, self.moveMarkerFactor);
                     obj.visible = true;
 
                     if (obj.hideTimout) {
