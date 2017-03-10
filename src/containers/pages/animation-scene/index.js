@@ -27,8 +27,10 @@ export class AnimationScene extends React.Component {
 
         let scene;
         let camera;
-        let animation;
+        let morphAnimation;
         let mesh;
+        let sceneAnimationClip;
+        let mixer;
 
         const renderer = new THREE.WebGLRenderer({
             canvas: canvasEl,
@@ -41,38 +43,47 @@ export class AnimationScene extends React.Component {
         var loader = new THREE.ObjectLoader();
         loader.load(
             'assets/models/anim/sphere.json',
-            ( newScene) => {
+            (newScene) => {
 
                 scene = window.scene = newScene;
+
+                // sceneAnimationClip = scene.animations[0];
+                // mixer = new THREE.AnimationMixer( scene );
+                // mixer.clipAction( sceneAnimationClip ).play();
 
                 camera = scene.getChildByName('Camera');
                 //
                 camera.setViewOffset(width, height, 0, 0, width, height);
 
                 mesh = scene.getChildByName('Icosphere');
+                mesh.material.morphTargets = true;
 
-                animation = new THREE.MorphAnimation(mesh);
-                animation.play();
+                mixer = new THREE.AnimationMixer(mesh);
 
-                console.log(scene);
+                var clip = THREE.AnimationClip.CreateFromMorphTargetSequence('gallop', mesh.geometry.morphTargets, 60);
+                mixer.clipAction(clip).setDuration(1).play();
+
+                console.log(clip);
+
             }
         );
 
 
-        let prevTime = Date.now();
-
+        var clock = new THREE.Clock();
 
         const render = () => {
             requestAnimationFrame(render);
 
-            if (scene){
-                renderer.render(scene, camera);
-                mesh.rotation.z += 0.01
+            var delta = clock.getDelta();
 
-                if (animation){
-                    let time = Date.now();
-                    animation.update(time - prevTime);
-                    prevTime = time;
+            if (scene) {
+                renderer.render(scene, camera);
+                mesh.rotation.z += 0.003;
+                mesh.updateMatrix();
+
+                if (mixer) {
+                    mixer.update(delta);
+
                 }
             }
 
@@ -82,19 +93,11 @@ export class AnimationScene extends React.Component {
     }
 
     render() {
-        const canvasStyle = {
-            // paddingLeft: 0,
-            // paddingRight: 0,
-            // marginLeft: 'auto',
-            // marginRight: 'auto',
-            // display: 'block',
-        };
         return (
             <div>
                 <div>
-                    <canvas ref="canvas" width={800} height={600} style={canvasStyle}/>
+                    <canvas ref="canvas" width={800} height={600}/>
                 </div>
-
             </div>
         )
     }
