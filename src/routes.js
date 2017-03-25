@@ -6,6 +6,7 @@ import Counter from './containers/pages/counter/index';
 import SimpleScene from './containers/pages/simple-scene/index';
 import SpeedyScene from './containers/pages/speedy-scene/index';
 import Animation from './containers/pages/animation-scene/index';
+import Animation2 from './containers/pages/animation2-scene/index';
 import VRScene from './containers/pages/vr-scene/index';
 import ArScene from './containers/pages/ar-scene/index';
 
@@ -14,6 +15,7 @@ export default (
         <IndexRoute component={Home} />
         <Route path="/counter" component={Counter} />
         <Route path="/animation" component={Animation} />
+        <Route path="/animation2" component={Animation2} />
         <Route path="/simple-scene" component={SimpleScene} />
         <Route path="/speedy-scene" component={SpeedyScene} />
         <Route path="/vr-scene" component={VRScene} />

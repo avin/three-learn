@@ -2,12 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 
-const THREE = window.THREE = require('three');
-
-THREE.MorphAnimation = require('imports-loader?THREE=three!exports-loader?THREE.MorphAnimation!three/examples/js/MorphAnimation');
-
-
-export class AnimationScene extends React.Component {
+export class Animation2Scene extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const {position, rotation} = nextProps;
@@ -16,80 +11,45 @@ export class AnimationScene extends React.Component {
     }
 
     componentDidMount() {
-        const canvasEl = this.refs.canvas;
-        const rect = canvasEl.getBoundingClientRect();
+        // get the canvas DOM element
+        var canvas = this.refs.canvas;
 
-        canvasEl.width = window.innerWidth - rect.left * 2;
-        canvasEl.height = window.innerHeight - rect.top - 4;
+        // load the 3D engine
+        var engine = new BABYLON.Engine(canvas, true);
 
-        const width = canvasEl.width;
-        const height = canvasEl.height;
+        BABYLON.SceneLoader.Load("", "assets/models/anim2/arm1.babylon", engine, function (newScene) {
+            // Wait for textures and shaders to be ready
+            newScene.executeWhenReady(function () {
+                // Attach camera to canvas inputs
+                newScene.activeCamera.attachControl(canvas);
 
-        let scene;
-        let camera;
-        let morphAnimation;
-        let mesh;
-        let sceneAnimationClip;
-        let mixer;
-
-        const renderer = new THREE.WebGLRenderer({
-            canvas: canvasEl,
-            antialias: true
-        });
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(width, height);
-
-        //Add main mesh
-        var loader = new THREE.ObjectLoader();
-        loader.load(
-            'assets/models/anim/sphere.json',
-            (newScene) => {
-
-                scene = window.scene = newScene;
-
-                // sceneAnimationClip = scene.animations[0];
-                // mixer = new THREE.AnimationMixer( scene );
-                // mixer.clipAction( sceneAnimationClip ).play();
-
-                camera = scene.getChildByName('Camera');
-                //
-                camera.setViewOffset(width, height, 0, 0, width, height);
-
-                mesh = scene.getChildByName('Icosphere');
-                mesh.material.morphTargets = true;
-
-                mixer = new THREE.AnimationMixer(mesh);
-
-                var clip = THREE.AnimationClip.CreateFromMorphTargetSequence('gallop', mesh.geometry.morphTargets, 60);
-                mixer.clipAction(clip).setDuration(1).play();
-
-                console.log(clip);
-
-            }
-        );
-
-
-        var clock = new THREE.Clock();
-
-        const render = () => {
-            requestAnimationFrame(render);
-
-            var delta = clock.getDelta();
-
-            if (scene) {
-                renderer.render(scene, camera);
-                mesh.rotation.z += 0.003;
-                mesh.updateMatrix();
-
-                if (mixer) {
-                    mixer.update(delta);
-
+                for(let mesh of newScene.meshes){
+                    mesh.convertToFlatShadedMesh();
+                    mesh.showBoundingBox = true;
                 }
-            }
 
-        };
+                let box = newScene.getMeshByName('Cube');
 
-        render();
+                newScene.beginAnimation(box, 60, 110, true, 1.0);
+
+                console.log(newScene, box);
+
+
+                console.log(newScene);
+
+                // Once the scene is loaded, just register a render loop to render it
+                engine.runRenderLoop(function() {
+                    newScene.render();
+                });
+            });
+        }, function (progress) {
+            // To do: give progress feedback to user
+        });
+
+        // the canvas/window resize event handler
+        window.addEventListener('resize', function(){
+            engine.resize();
+        });
     }
 
     render() {
@@ -113,4 +73,4 @@ function mapStateToProps(state, ownProps) {
 export default connect(
     mapStateToProps,
     {}
-)(AnimationScene)
+)(Animation2Scene)

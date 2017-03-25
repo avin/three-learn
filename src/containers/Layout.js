@@ -24,6 +24,10 @@ class Layout extends React.Component {
                 title: 'Animate',
             },
             {
+                route: '/animation2',
+                title: 'Animate2',
+            },
+            {
                 route: '/simple-scene',
                 title: 'SimpleScene',
             },
