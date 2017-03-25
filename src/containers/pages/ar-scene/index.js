@@ -69,7 +69,7 @@ export class ARScene extends React.Component {
         });
 
         // При смене ориантации страницы отработать оповорот
-        window.addEventListener("orientationchange", () => {
+        window.addEventListener('orientationchange', () => {
             //При смене ориентации делаем реинит
             this.handleReInit()
         }, false);

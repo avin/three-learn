@@ -17,7 +17,7 @@ export class Animation2Scene extends React.Component {
         // load the 3D engine
         var engine = new BABYLON.Engine(canvas, true);
 
-        BABYLON.SceneLoader.Load("", "assets/models/anim2/arm1.babylon", engine, function (newScene) {
+        BABYLON.SceneLoader.Load('', 'assets/models/anim2/arm1.babylon', engine, function (newScene) {
             // Wait for textures and shaders to be ready
             newScene.executeWhenReady(function () {
                 // Attach camera to canvas inputs
